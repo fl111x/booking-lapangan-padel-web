@@ -51,7 +51,7 @@ const checkCreateGor = (req, res, next) => {
     return;
   }
 
-  return errors;
+  next();
 };
 
 validateIDGor = (req, res, next) => {
@@ -60,6 +60,7 @@ validateIDGor = (req, res, next) => {
     res.status(400).json({ field: 'idGor', message: 'ID GOR tidak valid' });
     return;
   }
+  
   next();
 };
 
