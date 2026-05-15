@@ -18,6 +18,8 @@ const getAllGors =  async (req, res) => {
 
 const createNewGor = async (req, res) => {
     try {
+        console.log("mantap");
+        console.log(req.body);
         await gorModel.createNewGor(req.body);
         res.json({
             message: 'create new gor',
