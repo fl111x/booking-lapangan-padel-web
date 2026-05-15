@@ -50,7 +50,7 @@ const checkCreateGor = (req, res, next) => {
     res.status(400).json({ field: 'status', message: 'Status hanya boleh berisi "buka" atau "tutup"' });
     return;
   }
-
+  next();
   return errors;
 };
 
