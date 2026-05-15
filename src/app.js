@@ -9,6 +9,7 @@ const penggunaRoutes = require('./routes/penggunaRoutes');
 const lapanganRoutes = require('./routes/lapanganRoutes');
 const pemesananRoutes = require('./routes/pemesananRoutes');
 const ulasanRoutes = require('./routes/ulasanRoutes');
+const membershipRoutes = require('./routes/membershipRoutes');
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
@@ -20,4 +21,5 @@ app.use('/pengguna', penggunaRoutes);
 app.use('/lapangan', lapanganRoutes);
 app.use('/pemesanan', pemesananRoutes);
 app.use('/ulasan', ulasanRoutes);
+app.use('/membership', membershipRoutes);
 
