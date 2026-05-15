@@ -50,8 +50,8 @@ const checkCreateGor = (req, res, next) => {
     res.status(400).json({ field: 'status', message: 'Status hanya boleh berisi "buka" atau "tutup"' });
     return;
   }
+
   next();
-  return errors;
 };
 
 validateIDGor = (req, res, next) => {
@@ -60,6 +60,7 @@ validateIDGor = (req, res, next) => {
     res.status(400).json({ field: 'idGor', message: 'ID GOR tidak valid' });
     return;
   }
+  
   next();
 };
 

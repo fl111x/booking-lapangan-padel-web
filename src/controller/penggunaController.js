@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const penggunaModel = require('../model/pengguna');
 
 const getAllPenggunas =  async (req, res) => {
@@ -18,11 +19,29 @@ const getAllPenggunas =  async (req, res) => {
 
 const createNewPengguna = async (req, res) => {
     try {
+        const { password } = req.body;
+        
+        // 1. Tentukan salt round (standarnya 10)
+        const saltRounds = 10;
+        
+        // 2. Hash password-nya
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        
+        // 3. Ganti password plain text dengan yang sudah di-hash
+        const userData = {
+            ...req.body,
+            password: hashedPassword
+        };
+
         await penggunaModel.createNewPengguna(req.body);
+        
         res.json({
             success: true,
             message: 'Pengguna created successfully',
-            data: req.body
+            data: {
+                nama: userData.nama,
+                email: userData.email
+            }
         });
     } catch (error) {
         res.status(500).json({
@@ -35,11 +54,29 @@ const createNewPengguna = async (req, res) => {
 const updatePengguna = async (req, res) => {
     const {idPengguna} = req.params;
     try {
+        const { password } = req.body;
+        
+        // 1. Tentukan salt round (standarnya 10)
+        const saltRounds = 10;
+        
+        // 2. Hash password-nya
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        
+        // 3. Ganti password plain text dengan yang sudah di-hash
+        const userData = {
+            ...req.body,
+            password: hashedPassword
+        };
+
         await penggunaModel.updatePengguna(idPengguna, req.body);
+        
         res.json({
             success: true,
             message: 'Pengguna updated successfully',
-            data: req.body
+            data: {
+                nama: userData.nama,
+                email: userData.email
+            }
         });
     } catch (error) {
         res.status(500).json({
