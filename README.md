@@ -61,9 +61,10 @@ knex migrate:rollback
 #### Mereset Total Seluruh Struktur Tabel (Hapus Semua):
 knex migrate:rollback --all
 
-### 5. Denah Struktur Folder Proyek Backend
+### 5. Denah Struktur Folder Proyek
+## 🗂️ Denah Struktur Folder Proyek Backend
 ├── src/
-│   ├── config/          # Pengaturan database, dotenv, dan inisialisasi Midtrans Client
+│   ├── config/          # Pengaturan database dan inisialisasi Midtrans Client
 │   ├── controllers/     # Logika bisnis utama (Pemesanan, Membership, User Auth, Webhook Callback)
 │   ├── migrations/      # Berkas skema tabel database (Total 10 tabel terstruktur)
 │   ├── models/          # Query builder Knex untuk komunikasi ke database
