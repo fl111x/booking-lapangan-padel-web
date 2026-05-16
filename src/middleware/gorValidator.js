@@ -1,7 +1,6 @@
 // Fungsi ini hanya bertugas mengecek data dan mengembalikan daftar error
 const checkCreateGor = (req, res, next) => {
   const data = req.body;
-  const errors = [];
 
   // Regex untuk format waktu (HH:MM atau HH:MM:SS)
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/;
