@@ -5,13 +5,14 @@ const getAllLapangan = async (req, res) => {
         const [data] = await lapanganModel.getAllLapangan();
         res.json({
             success: true,
-            message: 'get all lapangan',
+            message: 'Berhasil mengambil seluruh data lapangan',
             data: data
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal mengambil data lapangan',
+            error: error.message
         });
     }
 }
@@ -19,49 +20,55 @@ const getAllLapangan = async (req, res) => {
 const createNewLapangan = async (req, res) => {
     try {
         await lapanganModel.createNewLapangan(req.body);
-        res.json({
+        res.status(201).json({
             success: true,
-            message: 'Lapangan created successfully',
+            message: 'Lapangan baru berhasil ditambahkan',
             data: req.body
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal menambahkan lapangan baru',
+            error: error.message
         });
     }
 }
 
 const updateLapangan = async (req, res) => {
-    const {idLapangan} = req.params;
+    const { idLapangan } = req.params;
     try {
         await lapanganModel.updateLapangan(idLapangan, req.body);
         res.json({
             success: true,
-            message: 'Lapangan updated successfully',
-            data: req.body
+            message: 'Data lapangan berhasil diperbarui',
+            data: {
+                id_lapangan: idLapangan,
+                ...req.body
+            }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal memperbarui data lapangan',
+            error: error.message
         });
     }
 }
 
 const deleteLapangan = async (req, res) => {
-    const {idLapangan} = req.params;
+    const { idLapangan } = req.params;
     try {
         await lapanganModel.deleteLapangan(idLapangan);
         res.json({
             success: true,
-            message: 'Lapangan deleted successfully',
-            data: idLapangan 
+            message: 'Data lapangan berhasil dihapus',
+            data: idLapangan
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal menghapus data lapangan',
+            error: error.message
         });
     }
 }
@@ -71,4 +78,4 @@ module.exports = {
     createNewLapangan,
     updateLapangan,
     deleteLapangan
-}
+};
