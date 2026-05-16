@@ -1,9 +1,13 @@
-const ulasanController = require('../controllers/ulasanController');
 const express = require('express');
 const router = express.Router();
+const ulasanController = require('../controller/ulasanController');
+
+const { checkCreateUlasan, validateIDUlasan } = require('../middleware/ulasanValidator');
 
 router
 .get('/', ulasanController.getAllUlasans)
-.post('/', ulasanController.createNewUlasan)
-.put('/:idUlasan', ulasanController.updateUlasan)
-.delete('/:idUlasan', ulasanController.deleteUlasan);
+.post('/', checkCreateUlasan, ulasanController.createNewUlasan)
+.put('/:idUlasan', validateIDUlasan, checkCreateUlasan, ulasanController.updateUlasan)
+.delete('/:idUlasan', validateIDUlasan, ulasanController.deleteUlasan);
+
+module.exports = router;

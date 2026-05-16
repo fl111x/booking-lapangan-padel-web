@@ -1,18 +1,19 @@
 const bcrypt = require('bcrypt');
 const penggunaModel = require('../model/pengguna');
 
-const getAllPenggunas =  async (req, res) => {
-    try{
+const getAllPenggunas = async (req, res) => {
+    try {
         const [data] = await penggunaModel.getAllPenggunas();
         res.json({
             success: true,
-            message: 'get all pengguna',
+            message: 'Berhasil mengambil seluruh data pengguna',
             data: data
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal mengambil data pengguna',
+            error: error.message
         });
     }
 }
@@ -20,60 +21,55 @@ const getAllPenggunas =  async (req, res) => {
 const createNewPengguna = async (req, res) => {
     try {
         const { password } = req.body;
-        
-        // 1. Tentukan salt round (standarnya 10)
         const saltRounds = 10;
-        
-        // 2. Hash password-nya
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
-        // 3. Ganti password plain text dengan yang sudah di-hash
         const userData = {
             ...req.body,
             password: hashedPassword
         };
 
-        await penggunaModel.createNewPengguna(req.body);
+        // Menggunakan userData yang sudah aman ter-hash
+        await penggunaModel.createNewPengguna(userData);
         
-        res.json({
+        res.status(201).json({
             success: true,
-            message: 'Pengguna created successfully',
+            message: 'Pengguna baru berhasil didaftarkan',
             data: {
                 nama: userData.nama,
-                email: userData.email
+                email: userData.email,
+                role: userData.role || 'pelanggan'
             }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal mendaftarkan pengguna',
+            error: error.message
         });
     }
 }
 
 const updatePengguna = async (req, res) => {
-    const {idPengguna} = req.params;
+    const { idPengguna } = req.params;
     try {
         const { password } = req.body;
-        
-        // 1. Tentukan salt round (standarnya 10)
         const saltRounds = 10;
-        
-        // 2. Hash password-nya
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         
-        // 3. Ganti password plain text dengan yang sudah di-hash
         const userData = {
             ...req.body,
             password: hashedPassword
         };
 
-        await penggunaModel.updatePengguna(idPengguna, req.body);
+        // Menggunakan userData, bukan req.body plain text
+        await penggunaModel.updatePengguna(idPengguna, userData);
         
         res.json({
             success: true,
-            message: 'Pengguna updated successfully',
+            message: 'Data pengguna berhasil diperbarui',
             data: {
+                id_pengguna: idPengguna,
                 nama: userData.nama,
                 email: userData.email
             }
@@ -81,24 +77,26 @@ const updatePengguna = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal memperbarui data pengguna',
+            error: error.message
         });
     }
 }
 
 const deletePengguna = async (req, res) => {
-    const {idPengguna} = req.params;
+    const { idPengguna } = req.params;
     try {
         await penggunaModel.deletePengguna(idPengguna);
         res.json({
             success: true,
-            message: 'Pengguna deleted successfully',
-            data: idPengguna 
+            message: 'Akun pengguna berhasil dihapus',
+            data: idPengguna
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal menghapus pengguna',
+            error: error.message
         });
     }
 };
@@ -108,4 +106,4 @@ module.exports = {
     createNewPengguna,
     updatePengguna,
     deletePengguna
-}
+};

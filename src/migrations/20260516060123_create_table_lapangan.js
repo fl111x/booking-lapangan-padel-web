@@ -11,7 +11,7 @@ exports.up = function(knex) {
         table.string('nama_lapangan', 255).notNullable();
         table.enum('tipe', ['Indoor', 'Outdoor']).notNullable();
         table.integer('harga_per_jam').notNullable();
-        table.enum('status_lapangan', ['tersedia', 'perbaikan']);
+        table.enum('status_lapangan', ['tersedia', 'perbaikan']).defaultTo('tersedia').notNullable;
         table.string('foto_lapangan', 255).nullable();
     });
 };

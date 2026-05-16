@@ -1,28 +1,32 @@
 const dbPool = require('../config/db');
 
 const getAllLapangan = () => {
-    const SQL = 'SELECT * FROM lapangan';
+    const SQL = 'SELECT id_lapangan, id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan, foto_lapangan FROM lapangan';
     return dbPool.execute(SQL);
 }
 
 const createNewLapangan = (data) => {
-    const {id_gor, nama_lapangan, tipe, harga_per_jam} = data;
-    const SQL = `INSERT INTO lapangan (id_gor,nama_lapangan, tipe, harga_per_jam) 
-                 VALUES ('${id_gor}', '${nama_lapangan}', '${tipe}', ${harga_per_jam})`;
-    return dbPool.execute(SQL);
+    const { id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan, foto_lapangan } = data;
+    
+    const SQL = `INSERT INTO lapangan (id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan, foto_lapangan) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+                 
+    return dbPool.execute(SQL, [id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan || 'tersedia', foto_lapangan || null]);
 }
 
 const updateLapangan = (idLapangan, data) => {
-    const {id_gor, nama_lapangan, tipe, harga_per_jam} = data;
+    const { id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan, foto_lapangan } = data;
+    
     const SQL = `UPDATE lapangan
-                    SET id_gor = '${id_gor}', nama_lapangan = '${nama_lapangan}', tipe = '${tipe}', harga_per_jam = ${harga_per_jam}
-                    WHERE id_lapangan = ${idLapangan}`;
-    return dbPool.execute(SQL);
+                 SET id_gor = ?, nama_lapangan = ?, tipe = ?, harga_per_jam = ?, status_lapangan = ?, foto_lapangan = ?
+                 WHERE id_lapangan = ?`;
+                 
+    return dbPool.execute(SQL, [id_gor, nama_lapangan, tipe, harga_per_jam, status_lapangan || 'tersedia', foto_lapangan || null, idLapangan]);
 }
 
 const deleteLapangan = (idLapangan) => {
-    const SQL = `DELETE FROM lapangan WHERE id_lapangan = ${idLapangan}`;
-    return dbPool.execute(SQL);
+    const SQL = 'DELETE FROM lapangan WHERE id_lapangan = ?';
+    return dbPool.execute(SQL, [idLapangan]);
 }
 
 module.exports = {
@@ -30,4 +34,4 @@ module.exports = {
     createNewLapangan,
     updateLapangan,
     deleteLapangan
-}
+};

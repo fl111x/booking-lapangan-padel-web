@@ -1,17 +1,18 @@
 const pemesananModel = require('../model/pemesanan');
 
-const getAllPemesanan =  async (req, res) => {
-    try{
+const getAllPemesanan = async (req, res) => {
+    try {
         const [data] = await pemesananModel.getAllPemesanan();
         res.json({
             success: true,
-            message: 'get all pemesanan',
+            message: 'Berhasil mengambil seluruh data pemesanan',
             data: data
         });
-    }catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal mengambil data pemesanan',
+            error: error.message
         });
     }
 }
@@ -19,49 +20,55 @@ const getAllPemesanan =  async (req, res) => {
 const createNewPemesanan = async (req, res) => {
     try {
         await pemesananModel.createNewPemesanan(req.body);
-        res.json({
+        res.status(201).json({
             success: true,
-            message: 'Pemesanan created successfully',
+            message: 'Pemesanan baru berhasil dibuat',
             data: req.body
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal membuat pemesanan baru',
+            error: error.message
         });
     }
 }
 
 const updatePemesanan = async (req, res) => {
-    const {idPemesanan} = req.params;
+    const { idPemesanan } = req.params;
     try {
         await pemesananModel.updatePemesanan(idPemesanan, req.body);
         res.json({
             success: true,
-            message: 'Pemesanan updated successfully',
-            data: req.body
+            message: 'Data pemesanan berhasil diperbarui',
+            data: {
+                id_pemesanan: idPemesanan,
+                ...req.body
+            }
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal memperbarui data pemesanan',
+            error: error.message
         });
     }
 }
 
 const deletePemesanan = async (req, res) => {
-    const {idPemesanan} = req.params;
-    try{
+    const { idPemesanan } = req.params;
+    try {
         await pemesananModel.deletePemesanan(idPemesanan);
         res.json({
             success: true,
-            message: 'Pemesanan deleted successfully',
-            data: idPemesanan 
+            message: 'Pemesanan berhasil dihapus',
+            data: idPemesanan
         });
-    }catch (error) {
+    } catch (error) {
         res.status(500).json({
             success: false,
-            message: error
+            message: 'Gagal menghapus data pemesanan',
+            error: error.message
         });
     }
 }
@@ -71,4 +78,4 @@ module.exports = {
     createNewPemesanan,
     updatePemesanan,
     deletePemesanan
-}
+};
