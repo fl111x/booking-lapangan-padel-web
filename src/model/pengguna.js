@@ -25,9 +25,21 @@ const deletePengguna = (idPengguna) => {
     return dbPool.execute(SQL);
 }
 
+
+const findPenggunaByEmail = (email, callback) => {
+  const query = `
+    SELECT * FROM pengguna
+    WHERE email = ?
+  `;
+
+  db.query(query, [email], callback);
+};
+
+
 module.exports = {
     getAllPenggunas,
     createNewPengguna,
     updatePengguna,
-    deletePengguna
+    deletePengguna,
+    findPenggunaByEmail
 }

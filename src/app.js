@@ -1,7 +1,13 @@
+require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
+
+app.use(cors());
 app.use(express.json());
+
 
 // routes
 const gorRoutes = require('./routes/gorRoutes');
@@ -10,6 +16,7 @@ const lapanganRoutes = require('./routes/lapanganRoutes');
 const pemesananRoutes = require('./routes/pemesananRoutes');
 const ulasanRoutes = require('./routes/ulasanRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
@@ -22,4 +29,4 @@ app.use('/lapangan', lapanganRoutes);
 app.use('/pemesanan', pemesananRoutes);
 app.use('/ulasan', ulasanRoutes);
 app.use('/membership', membershipRoutes);
-
+app.use('/auth', authRoutes);
