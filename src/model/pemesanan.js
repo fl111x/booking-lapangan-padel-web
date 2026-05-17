@@ -31,9 +31,15 @@ const deletePemesanan = (idPemesanan) => {
     return dbPool.execute(SQL, [idPemesanan]);
 }
 
+const updateStatusPemesanan = (idPemesanan, statusPemesanan) => {
+    const SQL = 'UPDATE pemesanan SET status_pemesanan = ? WHERE id_pemesanan = ?';
+    return dbPool.execute(SQL, [statusPemesanan, idPemesanan]);
+};
+
 module.exports = {
     getAllPemesanan,
     createNewPemesanan,
     updatePemesanan,
-    deletePemesanan
+    deletePemesanan,
+    updateStatusPemesanan
 };

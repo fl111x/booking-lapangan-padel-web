@@ -37,9 +37,24 @@ const deletePembayaranPemesanan = (idPembayaranPemesanan) => {
     return dbPool.execute(SQL, [idPembayaranPemesanan]);
 }
 
+const getPembayaranByOrderId = (orderId) => {
+    const SQL = 'SELECT id_pembayaran_pemesanan, id_pemesanan, jumlah_bayar FROM pembayaran_pemesanan WHERE order_id = ? LIMIT 1';
+    return dbPool.execute(SQL, [orderId]);
+};
+
+const updateStatusPembayaranByOrderId = (orderId, data) => {
+    const { transaction_id, payment_type, status_pembayaran_pemesanan, tanggal_pembayaran } = data;
+    const SQL = `UPDATE pembayaran_pemesanan 
+                 SET transaction_id = ?, payment_type = ?, status_pembayaran_pemesanan = ?, tanggal_pembayaran = ? 
+                 WHERE order_id = ?`;
+    return dbPool.execute(SQL, [transaction_id, payment_type, status_pembayaran_pemesanan, tanggal_pembayaran, orderId]);
+};
+
 module.exports = {
     getAllPembayaranPemesanan,
     createNewPembayaranPemesanan,
     updatePembayaranPemesanan,
-    deletePembayaranPemesanan
+    deletePembayaranPemesanan,
+    getPembayaranByOrderId,
+    updateStatusPembayaranByOrderId
 };

@@ -35,9 +35,26 @@ const deletePembayaran = (idPembayaran) => {
     return dbPool.execute(SQL, [idPembayaran]);
 }
 
+// Fungsi baru untuk mencari kas pembayaran member berdasarkan Order ID Midtrans
+const getPembayaranByOrderId = (orderId) => {
+    const SQL = 'SELECT id_pembayaran, id_langganan, jumlah_bayar FROM pembayaran_membership WHERE order_id = ? LIMIT 1';
+    return dbPool.execute(SQL, [orderId]);
+};
+
+// Fungsi baru untuk memperbarui status kas pembayaran member dari respon Webhook
+const updateStatusPembayaranByOrderId = (orderId, data) => {
+    const { transaction_id, payment_type, status_pembayaran_membership, tanggal_pembayaran } = data;
+    const SQL = `UPDATE pembayaran_membership 
+                 SET transaction_id = ?, payment_type = ?, status_pembayaran_membership = ?, tanggal_pembayaran = ? 
+                 WHERE order_id = ?`;
+    return dbPool.execute(SQL, [transaction_id, payment_type, status_pembayaran_membership, tanggal_pembayaran, orderId]);
+};
+
 module.exports = {
     getAllPembayaran,
     createNewPembayaran,
     updatePembayaran,
-    deletePembayaran
+    deletePembayaran,
+    getPembayaranByOrderId,
+    updateStatusPembayaranByOrderId
 };

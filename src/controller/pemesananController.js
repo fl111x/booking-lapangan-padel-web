@@ -1,4 +1,6 @@
 const pemesananModel = require('../model/pemesanan');
+const cekJadwal = require('../utils/cekJadwal');
+const hitungDiskon = require('../utils/hitungDiskon');
 
 const getAllPemesanan = async (req, res) => {
     try {
@@ -18,17 +20,41 @@ const getAllPemesanan = async (req, res) => {
 }
 
 const createNewPemesanan = async (req, res) => {
+    const { id_pengguna, id_lapangan, tanggal, jam_mulai, durasi } = req.body;
+    
     try {
-        await pemesananModel.createNewPemesanan(req.body);
+        // Proteksi bentrok jadwal lapangan
+        const isBentrok = await cekJadwal(id_lapangan, tanggal, jam_mulai, durasi);
+        if (isBentrok) {
+            return res.status(400).json({
+                success: false,
+                field: 'jam_mulai',
+                message: 'Gor/Lapangan sudah dibooking pada jam tersebut. Silakan pilih waktu atau lapangan lain.'
+            });
+        }
+
+        // Hitung diskon member dan total harga dari server
+        const kalkulasiHarga = await hitungDiskon(id_pengguna, id_lapangan, durasi);
+
+        // Satukan data request dari client dengan data hasil perhitungan server
+        const pemesananData = {
+            ...req.body,
+            potongan_diskon: kalkulasiHarga.potongan_diskon,
+            total_harga: kalkulasiHarga.total_harga
+        };
+
+        // Kirim data yang sudah bersih ke query MySQL
+        await pemesananModel.createNewPemesanan(pemesananData);
+        
         res.status(201).json({
             success: true,
-            message: 'Pemesanan baru berhasil dibuat',
-            data: req.body
+            message: 'Pemesanan lapangan berhasil dipesan dan dikunci!',
+            data: pemesananData
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Gagal membuat pemesanan baru',
+            message: 'Gagal memproses pemesanan lapangan baru',
             error: error.message
         });
     }

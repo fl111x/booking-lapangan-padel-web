@@ -30,13 +30,10 @@ const deletePengguna = (idPengguna) => {
 }
 
 
-const findPenggunaByEmail = (email, callback) => {
-  const query = `
-    SELECT * FROM pengguna
-    WHERE email = ?
-  `;
-
-  db.query(query, [email], callback);
+const findPenggunaByEmail = async (email) => {
+    const SQL = 'SELECT * FROM pengguna WHERE email = ? LIMIT 1';
+    const [rows] = await dbPool.execute(SQL, [email]);
+    return rows[0]; // Mengembalikan data objek pengguna jika ditemukan
 };
 
 
