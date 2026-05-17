@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || '3000';
 
 app.use(cors());
 app.use(express.json());
@@ -17,11 +17,6 @@ const pemesananRoutes = require('./routes/pemesananRoutes');
 const ulasanRoutes = require('./routes/ulasanRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const authRoutes = require('./routes/authRoutes');
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-});
-
 const langgananMembershipRoutes = require('./routes/langgananMembershipRoutes');
 const pembayaranMembershipRoutes = require('./routes/pembayaranMembershipRoutes');
 const notifikasiRoutes = require('./routes/notifikasiRoutes');
