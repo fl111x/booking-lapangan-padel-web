@@ -1,29 +1,34 @@
 const dbPool = require('../config/db');
 
 const getAllPemesanan = () => {
-    const SQL = 'SELECT * FROM pemesanan';
+    const SQL = `SELECT id_pemesanan, id_pengguna, id_lapangan, tanggal, jam_mulai, 
+                        durasi, potongan_diskon, total_harga, status_pemesanan, created_at, updated_at 
+                 FROM pemesanan`;
     return dbPool.execute(SQL);
 }
 
 const createNewPemesanan = (data) => {
-    const {id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, total_harga, status} = data;
-    const SQL = `INSERT INTO pemesanan (id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, total_harga, status) 
-                 VALUES ('${id_pengguna}', '${id_lapangan}', '${tanggal}', '${jam_mulai}', '${durasi}', '${total_harga}', '${status}')`;
-    return dbPool.execute(SQL);
+    const { id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon, total_harga, status_pemesanan } = data;
+    
+    const SQL = `INSERT INTO pemesanan (id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon, total_harga, status_pemesanan) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+                 
+    return dbPool.execute(SQL, [id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon || 0, total_harga, status_pemesanan || 'pending']);
 }
 
 const updatePemesanan = (idPemesanan, data) => {
-    const {id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, total_harga, status} = data;
+    const { id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon, total_harga, status_pemesanan } = data;
+    
     const SQL = `UPDATE pemesanan
-                 SET id_pengguna = ${id_pengguna}, id_lapangan = ${id_lapangan}, tanggal = ${tanggal}, 
-                 jam_mulai = ${jam_mulai}, durasi = ${durasi}, total_harga = ${total_harga}, status = ${status}
-                 WHERE id_pemesanan = ${idPemesanan}`;
-    return dbPool.execute(SQL);
+                 SET id_pengguna = ?, id_lapangan = ?, tanggal = ?, jam_mulai = ?, durasi = ?, potongan_diskon = ?, total_harga = ?, status_pemesanan = ?
+                 WHERE id_pemesanan = ?`;
+                 
+    return dbPool.execute(SQL, [id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon || 0, total_harga, status_pemesanan || 'pending', idPemesanan]);
 }
 
 const deletePemesanan = (idPemesanan) => {
-    const SQL = `DELETE FROM pemesanan WHERE id_pemesanan = ${idPemesanan}`;
-    return dbPool.execute(SQL);
+    const SQL = 'DELETE FROM pemesanan WHERE id_pemesanan = ?';
+    return dbPool.execute(SQL, [idPemesanan]);
 }
 
 module.exports = {
@@ -31,4 +36,4 @@ module.exports = {
     createNewPemesanan,
     updatePemesanan,
     deletePemesanan
-}
+};

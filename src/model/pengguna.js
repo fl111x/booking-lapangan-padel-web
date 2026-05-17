@@ -1,28 +1,32 @@
 const dbPool = require('../config/db');
 
-const getAllPenggunas =  () => {
-    const SQL = 'SELECT * FROM pengguna';
+const getAllPenggunas = () => {
+    const SQL = 'SELECT id_pengguna, nama, email, nomor_telepon, role, foto_profil, created_at, updated_at FROM pengguna';
     return dbPool.execute(SQL);
 }
 
 const createNewPengguna = (data) => {
-    const {nama, email, password, foto_profil} = data;
-    const SQL = `INSERT INTO pengguna (nama, email, password, foto_profil) 
-                 VALUES ('${nama}', '${email}', '${password}', '${foto_profil}')`;
-    return dbPool.execute(SQL);
+    const { nama, email, password, nomor_telepon, role, foto_profil } = data;
+    
+    const SQL = `INSERT INTO pengguna (nama, email, password, nomor_telepon, role, foto_profil) 
+                 VALUES (?, ?, ?, ?, ?, ?)`;
+                 
+    return dbPool.execute(SQL, [nama, email, password, nomor_telepon, role || 'pelanggan', foto_profil || null]);
 }
 
 const updatePengguna = (idPengguna, data) => {
-    const {nama, email, password, foto_profil} = data;
+    const { nama, email, password, nomor_telepon, role, foto_profil } = data;
+    
     const SQL = `UPDATE pengguna 
-                 SET nama = '${nama}', email = '${email}', password = '${password}', foto_profil = '${foto_profil}' 
-                 WHERE id_pengguna = ${idPengguna}`;
-    return dbPool.execute(SQL);
+                 SET nama = ?, email = ?, password = ?, nomor_telepon = ?, role = ?, foto_profil = ? 
+                 WHERE id_pengguna = ?`;
+                 
+    return dbPool.execute(SQL, [nama, email, password, nomor_telepon, role || 'pelanggan', foto_profil || null, idPengguna]);
 }
 
 const deletePengguna = (idPengguna) => {
-    const SQL = `DELETE FROM pengguna WHERE id_pengguna = ${idPengguna}`;
-    return dbPool.execute(SQL);
+    const SQL = 'DELETE FROM pengguna WHERE id_pengguna = ?';
+    return dbPool.execute(SQL, [idPengguna]);
 }
 
 
