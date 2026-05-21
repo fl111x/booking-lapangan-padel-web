@@ -34,9 +34,18 @@ const deleteNotifikasi = (idNotifikasi) => {
     return dbPool.execute(SQL, [idNotifikasi]);
 }
 
+const getNotifikasiByUserId = (idPengguna) => {
+    const SQL = `SELECT id_notifikasi, judul, pesan, is_read, created_at 
+                 FROM notifikasi 
+                 WHERE id_pengguna = ? 
+                 ORDER BY created_at DESC`;
+    return dbPool.execute(SQL, [idPengguna]);
+};
+
 module.exports = {
     getAllNotifikasi,
     createNewNotifikasi,
     updateNotifikasi,
-    deleteNotifikasi
+    deleteNotifikasi,
+    getNotifikasiByUserId
 };

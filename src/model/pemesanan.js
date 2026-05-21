@@ -36,10 +36,21 @@ const updateStatusPemesanan = (idPemesanan, statusPemesanan) => {
     return dbPool.execute(SQL, [statusPemesanan, idPemesanan]);
 };
 
+const getPemesananByUserId = (idPengguna) => {
+    const SQL = `SELECT p.id_pemesanan, p.id_lapangan, l.nama_lapangan, p.tanggal, p.jam_mulai, 
+                        p.durasi, p.potongan_diskon, p.total_harga, p.status_pemesanan, p.created_at
+                 FROM pemesanan p
+                 JOIN lapangan l ON p.id_lapangan = l.id_lapangan
+                 WHERE p.id_pengguna = ? 
+                 ORDER BY p.tanggal DESC, p.jam_mulai DESC`;
+    return dbPool.execute(SQL, [idPengguna]);
+};
+
 module.exports = {
     getAllPemesanan,
     createNewPemesanan,
     updatePemesanan,
     deletePemesanan,
-    updateStatusPemesanan
+    updateStatusPemesanan,
+    getPemesananByUserId
 };

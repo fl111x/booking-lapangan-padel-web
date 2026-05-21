@@ -29,9 +29,19 @@ const deleteLapangan = (idLapangan) => {
     return dbPool.execute(SQL, [idLapangan]);
 }
 
+const getJadwalTerpesan = (idLapangan, tanggal) => {
+    const SQL = `SELECT jam_mulai, durasi 
+                 FROM pemesanan 
+                 WHERE id_lapangan = ? 
+                   AND tanggal = ? 
+                   AND status_pemesanan IN ('pending', 'dibayar', 'selesai')`;
+    return dbPool.execute(SQL, [idLapangan, tanggal]);
+};
+
 module.exports = {
     getAllLapangan,
     createNewLapangan,
     updateLapangan,
-    deleteLapangan
+    deleteLapangan,
+    getJadwalTerpesan
 };

@@ -4,10 +4,13 @@ const langgananController = require('../controller/langgananMembershipController
 const { checkCreateLangganan, validateIDLangganan } = require('../middleware/langgananMembershipValidator');
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
 
-router
-.get('/', authenticateToken, requireRole('admin'), langgananController.getAllLangganan)
-.post('/', authenticateToken, checkCreateLangganan, langgananController.createNewLangganan)
-.put('/:idLangganan', authenticateToken, requireRole('admin'), validateIDLangganan, checkCreateLangganan, langgananController.updateLangganan)
-.delete('/:idLangganan', authenticateToken, requireRole('admin'), validateIDLangganan, langgananController.deleteLangganan);
+// RUTE PELANGGAN
+router.get('/saya', authenticateToken, langgananController.getLanggananUser);
+router.post('/', authenticateToken, checkCreateLangganan, langgananController.createNewLangganan);
+
+// RUTE ADMIN (Akses seluruh data & manipulasi)
+router.get('/', authenticateToken, requireRole('admin'), langgananController.getAllLangganan);
+router.put('/:idLangganan', authenticateToken, requireRole('admin'), validateIDLangganan, checkCreateLangganan, langgananController.updateLangganan);
+router.delete('/:idLangganan', authenticateToken, requireRole('admin'), validateIDLangganan, langgananController.deleteLangganan);
 
 module.exports = router;

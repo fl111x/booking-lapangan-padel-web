@@ -101,9 +101,69 @@ const deletePengguna = async (req, res) => {
     }
 };
 
+const getProfile = async (req, res) => {
+    // Mengambil ID secara rahasia dari hasil dekripsi Token JWT
+    const idPengguna = req.user.id_pengguna;
+
+    try {
+        const profil = await penggunaModel.findPenggunaById(idPengguna);
+        
+        if (!profil) {
+            return res.status(404).json({ success: false, message: 'Data profil tidak ditemukan' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Berhasil mengambil data profil kamu',
+            data: profil
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal mengambil data profil', error: error.message });
+    }
+};
+
+const updateProfile = async (req, res) => {
+    // Mengambil ID secara rahasia dari hasil dekripsi Token JWT
+    const idPengguna = req.user.id_pengguna;
+    
+    try {
+        const userLama = await penggunaModel.findPenggunaById(idPengguna);
+
+        let finalPassword = userLama.password;
+        if (req.body.password) {
+            const saltRounds = 10;
+            finalPassword = await bcrypt.hash(req.body.password, saltRounds);
+        }
+        
+        const userData = {
+            ...userLama,
+            ...req.body,
+            password: finalPassword
+        };
+
+        // Jalankan pembaruan ke database MySQL menggunakan ID dari token
+        await penggunaModel.updatePengguna(idPengguna, userData);
+        
+        res.json({
+            success: true,
+            message: 'Data profil kamu berhasil diperbarui!',
+            data: {
+                id_pengguna: idPengguna,
+                nama: userData.nama,
+                email: userData.email,
+                nomor_telepon: userData.nomor_telepon
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memperbarui profil', error: error.message });
+    }
+};
+
 module.exports = {
     getAllPenggunas,
     createNewPengguna,
     updatePengguna,
-    deletePengguna
+    deletePengguna,
+    getProfile,
+    updateProfile
 };
