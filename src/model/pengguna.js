@@ -33,14 +33,20 @@ const deletePengguna = (idPengguna) => {
 const findPenggunaByEmail = async (email) => {
     const SQL = 'SELECT * FROM pengguna WHERE email = ? LIMIT 1';
     const [rows] = await dbPool.execute(SQL, [email]);
-    return rows[0]; // Mengembalikan data objek pengguna jika ditemukan
+    return rows[0];
 };
 
+const findPenggunaById = async (idPengguna) => {
+    const SQL = 'SELECT id_pengguna, nama, email, nomor_telepon, role, foto_profil, created_at, updated_at FROM pengguna WHERE id_pengguna = ? LIMIT 1';
+    const [rows] = await dbPool.execute(SQL, [idPengguna]);
+    return rows[0];
+};
 
 module.exports = {
     getAllPenggunas,
     createNewPengguna,
     updatePengguna,
     deletePengguna,
-    findPenggunaByEmail
+    findPenggunaByEmail,
+    findPenggunaById
 }

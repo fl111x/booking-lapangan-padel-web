@@ -99,9 +99,25 @@ const deletePemesanan = async (req, res) => {
     }
 }
 
+const getPemesananUser = async (req, res) => {
+    const idPengguna = req.user.id_pengguna; // Diambil dari JWT, bukan dari URL
+    
+    try {
+        const [data] = await pemesananModel.getPemesananByUserId(idPengguna);
+        res.json({
+            success: true,
+            message: 'Berhasil mengambil riwayat pemesanan lapangan kamu',
+            data: data
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal mengambil riwayat pemesanan', error: error.message });
+    }
+};
+
 module.exports = {
     getAllPemesanan,
     createNewPemesanan,
     updatePemesanan,
-    deletePemesanan
+    deletePemesanan,
+    getPemesananUser
 };

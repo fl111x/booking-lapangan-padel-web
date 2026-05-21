@@ -35,10 +35,19 @@ const deleteLangganan = (idLangganan) => {
     return dbPool.execute(SQL, [idLangganan]);
 }
 
-// Fungsi baru untuk mengaktifkan status kontrak langganan paket member (aktif / tidak aktif / pending)
 const updateStatusLangganan = (idLangganan, statusLangganan) => {
     const SQL = 'UPDATE langganan_membership SET status_langganan = ? WHERE id_langganan = ?';
     return dbPool.execute(SQL, [statusLangganan, idLangganan]);
+};
+
+const getLanggananByUserId = (idPengguna) => {
+    const SQL = `SELECT lm.id_langganan, lm.id_membership, m.nama_membership, 
+                        lm.tanggal_mulai, lm.tanggal_berakhir, lm.status_langganan, lm.created_at
+                 FROM langganan_membership lm
+                 JOIN membership m ON lm.id_membership = m.id_membership
+                 WHERE lm.id_pengguna = ? 
+                 ORDER BY lm.created_at DESC`;
+    return dbPool.execute(SQL, [idPengguna]);
 };
 
 module.exports = {
@@ -46,5 +55,6 @@ module.exports = {
     createNewLangganan,
     updateLangganan,
     deleteLangganan,
-    updateStatusLangganan
+    updateStatusLangganan,
+    getLanggananByUserId
 };

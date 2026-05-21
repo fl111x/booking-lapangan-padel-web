@@ -21,6 +21,7 @@ const langgananMembershipRoutes = require('./routes/langgananMembershipRoutes');
 const pembayaranMembershipRoutes = require('./routes/pembayaranMembershipRoutes');
 const notifikasiRoutes = require('./routes/notifikasiRoutes');
 const pembayaranPemesananRoutes = require('./routes/pembayaranPemesananRoutes');
+const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
 
 app.use('/gor', gorRoutes);
 app.use('/pengguna', penggunaRoutes);
@@ -33,6 +34,7 @@ app.use('/langganan-membership', langgananMembershipRoutes);
 app.use('/pembayaran-membership', pembayaranMembershipRoutes);
 app.use('/pembayaran-pemesanan', pembayaranPemesananRoutes);
 app.use('/notifikasi', notifikasiRoutes);
+app.use('/admin', adminDashboardRoutes);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

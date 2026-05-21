@@ -73,9 +73,25 @@ const deleteLangganan = async (req, res) => {
     }
 }
 
+const getLanggananUser = async (req, res) => {
+    const idPengguna = req.user.id_pengguna; // Diambil dari JWT
+    
+    try {
+        const [data] = await langgananModel.getLanggananByUserId(idPengguna);
+        res.json({
+            success: true,
+            message: 'Berhasil mengambil data langganan membership kamu',
+            data: data
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal mengambil data langganan', error: error.message });
+    }
+};
+
 module.exports = {
     getAllLangganan,
     createNewLangganan,
     updateLangganan,
-    deleteLangganan
+    deleteLangganan,
+    getLanggananUser
 };
