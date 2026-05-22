@@ -5,80 +5,53 @@ const snap = require('../config/midtrans');
 const dbPool = require('../config/db');
 const { petakanStatusMidtrans } = require('../utils/midtransHelper');
 
-// 1. LOGIKA SNAP TOKEN CHECKOUT MEMBERSHIP
 const requestSnapTokenMembership = async (req, res) => {
-    const { id_langganan } = req.body;
+    // id_membership (ID Paket)
+    const { id_membership } = req.body;
+    const id_pengguna = req.user.id_pengguna;
 
     try {
-        // Ambil data detail harga membership dan profil pengguna menggunakan JOIN multi-tabel
-        const [langgananRaw] = await dbPool.execute(`
-            SELECT lm.id_pengguna, usr.nama, usr.email, m.nama_membership, m.harga, m.diskon
-            FROM langganan_membership lm
-            JOIN pengguna usr ON lm.id_pengguna = usr.id_pengguna
-            JOIN membership m ON lm.id_membership = m.id_membership
-            WHERE lm.id_langganan = ? LIMIT 1
-        `, [id_langganan]);
-
-        if (langgananRaw.length === 0) {
-            return res.status(404).json({ success: false, message: 'Data pendaftaran langganan tidak ditemukan' });
-        }
-
-        const dataMember = langgananRaw[0];
+        // 1. Ambil data paket membership untuk menghitung harga
+        const [paket] = await dbPool.execute('SELECT * FROM membership WHERE id_membership = ?', [id_membership]);
+        if (paket.length === 0) return res.status(404).json({ success: false, message: 'Paket membership tidak ditemukan' });
         
-        // Hitung nominal harga bersih setelah potongan diskon paket (jika ada)
-        const nominalAwal = dataMember.harga;
-        const diskonPersen = dataMember.diskon ? dataMember.diskon : 0;
-        const potonganHarga = (diskonPersen / 100) * nominalAwal;
-        const totalBayar = nominalAwal - potonganHarga;
+        const dataPaket = paket[0];
+        // Hitung total bayar setelah diskon
+        const totalBayar = dataPaket.harga - ((dataPaket.diskon / 100) * dataPaket.harga);
 
-        // Bikin Order ID unik untuk invoice transaksi membership
-        const orderId = `INV-MEMBER-${id_langganan}-${Date.now()}`;
+        // 2. Buat "Pending Subscription"
+        const [langganan] = await langgananModel.createNewLangganan({
+            id_pengguna: id_pengguna,
+            id_membership: id_membership,
+            tanggal_mulai: null, 
+            tanggal_berakhir: null, 
+            status_langganan: 'pending'
+        });
+        const id_langganan = langganan.insertId;
 
-        // Payload transaksi Midtrans Snap API
-        const transactionDetails = {
-            transaction_details: {
-                order_id: orderId,
-                gross_amount: totalBayar
-            },
-            customer_details: {
-                first_name: dataMember.nama,
-                email: dataMember.email
-            },
-            item_details: [{
-                id: `MBR-${id_langganan}`,
-                price: totalBayar,
-                quantity: 1,
-                name: `Paket Membership: ${dataMember.nama_membership}`
-            }]
-        };
-
-        // Mintakan token pop-up transaksi ke server Midtrans
-        const transaction = await snap.createTransaction(transactionDetails);
-        const snapToken = transaction.token;
-
-        // Catat entri awal log kas pembayaran ke database dengan status pending
+        // 3. Buat Invoice "Pending Payment" di tabel pembayaran_membership
+        const orderId = `INV-MBR-${id_langganan}-${Date.now()}`;
         await pembayaranModel.createNewPembayaran({
-            id_langganan,
+            id_langganan: id_langganan,
             order_id: orderId,
-            snap_token: snapToken,
             jumlah_bayar: totalBayar,
             status_pembayaran_membership: 'pending'
         });
 
-        res.status(201).json({
-            success: true,
-            message: 'Snap Token transaksi membership berhasil diterbitkan',
-            snap_token: snapToken,
-            order_id: orderId,
-            redirect_url: transaction.redirect_url
+        // 4. Generate Snap Token Midtrans
+        const transaction = await snap.createTransaction({
+            transaction_details: { order_id: orderId, gross_amount: totalBayar },
+            customer_details: { first_name: req.user.nama, email: req.user.email },
+            item_details: [{ id: `MBR-${id_membership}`, price: totalBayar, quantity: 1, name: dataPaket.nama_membership }]
         });
 
+        res.status(201).json({ success: true, snap_token: transaction.token, redirect_url: transaction.redirect_url });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Gagal memproses checkout membership', error: error.message });
+        res.status(500).json({ success: false, message: 'Gagal checkout paket membership', error: error.message });
     }
 };
 
-// 2. LOGIKA WEBHOOK NOTIFICATION CALLBACK KHUSUS FINANSIAL MEMBERSHIP
 const handleMidtransWebhookMembership = async (req, res) => {
     try {
         const notification = req.body;
@@ -90,18 +63,14 @@ const handleMidtransWebhookMembership = async (req, res) => {
         const paymentType = statusResponse.payment_type;
         const transactionId = statusResponse.transaction_id;
 
-        // Ambil data log lokal berdasarkan Order ID invoice
+        // Ambil data log lokal
         const [pembayaranLocal] = await pembayaranModel.getPembayaranByOrderId(orderId);
         if (pembayaranLocal.length === 0) {
             return res.status(404).json({ success: false, message: 'Order ID transaksi member tidak dikenali' });
         }
 
         const { id_langganan, jumlah_bayar } = pembayaranLocal[0];
-
         const { statusPembayaran, statusSistem } = petakanStatusMidtrans(transactionStatus, fraudStatus);
-
-        // Terjemahkan status khusus akun langganan membership
-        const statusLangganan = statusSistem === 'aktif_atau_dibayar' ? 'aktif' : (statusSistem === 'batal' ? 'tidak aktif' : 'pending');
 
         // A. Update status di tabel pembayaran_membership
         await pembayaranModel.updateStatusPembayaranByOrderId(orderId, {
@@ -111,19 +80,41 @@ const handleMidtransWebhookMembership = async (req, res) => {
             tanggal_pembayaran: statusPembayaran === 'berhasil' ? new Date() : null
         });
 
-        // B. Update status di tabel kontrak utama langganan_membership
-        await langgananModel.updateStatusLangganan(id_langganan, statusLangganan);
-
-        // C. Kirim Notifikasi Otomatis jika langganan berhasil aktif
+        // B. Update status & aktivasi tanggal di tabel langganan_membership
         if (statusPembayaran === 'berhasil') {
+            // Ambil durasi hari dari master paket
+            const [paketData] = await dbPool.execute(`
+                SELECT m.durasi_hari FROM langganan_membership lm
+                JOIN membership m ON lm.id_membership = m.id_membership
+                WHERE lm.id_langganan = ?`, [id_langganan]
+            );
+
+            const durasiHari = paketData[0].durasi_hari || 30;
+            const tglMulai = new Date();
+            const tglBerakhir = new Date();
+            tglBerakhir.setDate(tglMulai.getDate() + durasiHari);
+
+            // Update ke aktif dan kunci tanggalnya
+            await dbPool.execute(
+                `UPDATE langganan_membership 
+                 SET status_langganan = ?, tanggal_mulai = ?, tanggal_berakhir = ? 
+                 WHERE id_langganan = ?`,
+                ['aktif', tglMulai, tglBerakhir, id_langganan]
+            );
+
+            // C. Kirim Notifikasi Otomatis
             const [kontrak] = await dbPool.execute('SELECT id_pengguna FROM langganan_membership WHERE id_langganan = ? LIMIT 1', [id_langganan]);
             if (kontrak.length > 0) {
                 await notifikasiModel.createNewNotifikasi({
                     id_pengguna: kontrak[0].id_pengguna,
                     judul: 'Membership Kamu Sudah Aktif! 👑',
-                    pesan: `Selamat! Pembayaran untuk paket membership dengan invoice ${orderId} senilai Rp ${jumlah_bayar.toLocaleString('id-ID')} telah sukses. Kamu kini resmi menjadi member dan berhak mendapatkan diskon potongan harga sewa lapangan!`
+                    pesan: `Selamat! Pembayaran untuk paket membership dengan invoice ${orderId} senilai Rp ${jumlah_bayar.toLocaleString('id-ID')} telah sukses. Masa aktif langgananmu berlaku hingga ${tglBerakhir.toLocaleDateString('id-ID')}.`
                 });
             }
+        } else {
+            // Jika status gagal/pending/batal, hanya update status langganan tanpa ubah tanggal
+            const statusLangganan = statusSistem === 'batal' ? 'tidak aktif' : 'pending';
+            await langgananModel.updateStatusLangganan(id_langganan, statusLangganan);
         }
 
         res.status(200).json({ success: true, message: 'Webhook transaksi member berhasil diproses' });
@@ -136,34 +127,18 @@ const handleMidtransWebhookMembership = async (req, res) => {
 const getAllPembayaran = async (req, res) => {
     try {
         const [data] = await pembayaranModel.getAllPembayaran();
-        res.json({
-            success: true,
-            message: 'Berhasil mengambil seluruh riwayat transaksi pembayaran membership',
-            data: data
-        });
+        res.json({ success: true, message: 'Berhasil mengambil seluruh riwayat transaksi pembayaran membership', data: data });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mengambil data transaksi pembayaran',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Gagal mengambil data transaksi pembayaran', error: error.message });
     }
 }
 
 const createNewPembayaran = async (req, res) => {
     try {
         await pembayaranModel.createNewPembayaran(req.body);
-        res.status(201).json({
-            success: true,
-            message: 'Invoice pembayaran membership berhasil dicatat',
-            data: req.body
-        });
+        res.status(201).json({ success: true, message: 'Invoice pembayaran membership berhasil dicatat', data: req.body });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mencatat transaksi pembayaran baru',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Gagal mencatat transaksi pembayaran baru', error: error.message });
     }
 }
 
@@ -171,20 +146,9 @@ const updatePembayaran = async (req, res) => {
     const { idPembayaran } = req.params;
     try {
         await pembayaranModel.updatePembayaran(idPembayaran, req.body);
-        res.json({
-            success: true,
-            message: 'Data rekonsiliasi pembayaran berhasil diperbarui',
-            data: {
-                id_pembayaran: idPembayaran,
-                ...req.body
-            }
-        });
+        res.json({ success: true, message: 'Data rekonsiliasi pembayaran berhasil diperbarui', data: { id_pembayaran: idPembayaran, ...req.body } });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Gagal memperbarui data transaksi pembayaran',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Gagal memperbarui data transaksi pembayaran', error: error.message });
     }
 }
 
@@ -192,17 +156,9 @@ const deletePembayaran = async (req, res) => {
     const { idPembayaran } = req.params;
     try {
         await pembayaranModel.deletePembayaran(idPembayaran);
-        res.json({
-            success: true,
-            message: 'Catatan finansial transaksi berhasil dihapus',
-            data: idPembayaran
-        });
+        res.json({ success: true, message: 'Catatan finansial transaksi berhasil dihapus', data: idPembayaran });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Gagal menghapus catatan transaksi pembayaran',
-            error: error.message
-        });
+        res.status(500).json({ success: false, message: 'Gagal menghapus catatan transaksi pembayaran', error: error.message });
     }
 }
 

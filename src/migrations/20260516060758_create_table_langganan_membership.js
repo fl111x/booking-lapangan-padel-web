@@ -11,8 +11,8 @@ exports.up = function(knex) {
     table.integer('id_membership').unsigned().notNullable()
          .references('id_membership').inTable('membership')
          .onDelete('CASCADE');
-    table.date('tanggal_mulai').notNullable();
-    table.date('tanggal_berakhir').notNullable();
+    table.date('tanggal_mulai').Nullable();
+    table.date('tanggal_berakhir').Nullable();
     table.enum('status_langganan', ['aktif', 'tidak aktif', 'pending']).defaultTo('pending');
     table.timestamps(true, true);
   });

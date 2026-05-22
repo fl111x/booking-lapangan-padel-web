@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const penggunaController = require('../controller/penggunaController');
-const { checkCreatePengguna, validateIDPengguna } = require('../middleware/penggunaValidator');
+const { checkCreatePengguna, checkUpdatePengguna, validateIDPengguna } = require('../middleware/penggunaValidator');
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
 
 // ==========================================
 // 1. RUTE PELANGGAN (Wajib Login)
 // ==========================================
-router.get('/profile', authenticateToken, penggunaController.getProfile);
-router.put('/profile', authenticateToken, checkCreatePengguna, penggunaController.updateProfile);
+router.get('/user', authenticateToken, penggunaController.getProfile);
+router.put('/user', authenticateToken, checkUpdatePengguna, penggunaController.updateProfile);
 
 // ==========================================
 // 2. RUTE ADMIN (Wajib Login + Role Admin)

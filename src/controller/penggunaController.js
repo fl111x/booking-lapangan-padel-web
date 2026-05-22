@@ -102,7 +102,6 @@ const deletePengguna = async (req, res) => {
 };
 
 const getProfile = async (req, res) => {
-    // Mengambil ID secara rahasia dari hasil dekripsi Token JWT
     const idPengguna = req.user.id_pengguna;
 
     try {
@@ -111,6 +110,8 @@ const getProfile = async (req, res) => {
         if (!profil) {
             return res.status(404).json({ success: false, message: 'Data profil tidak ditemukan' });
         }
+
+        delete profil.password;
 
         res.json({
             success: true,

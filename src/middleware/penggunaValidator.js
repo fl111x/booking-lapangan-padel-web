@@ -45,6 +45,24 @@ const checkCreatePengguna = (req, res, next) => {
   next();
 };
 
+const checkUpdatePengguna = (req, res, next) => {
+  const data = req.body;
+  
+  if (data.nama && (typeof data.nama !== 'string' || data.nama.length < 3)) {
+    return res.status(400).json({ field: 'nama', message: 'Nama harus berupa teks minimal 3 karakter' });
+  }
+  if (data.email && !emailRegex.test(data.email)) {
+    return res.status(400).json({ field: 'email', message: 'Format email tidak valid' });
+  }
+  if (data.password && data.password.length < 8) {
+    return res.status(400).json({ field: 'password', message: 'Password minimal harus 8 karakter' });
+  }
+  if (data.nomor_telepon && !phoneRegex.test(data.nomor_telepon)) {
+    return res.status(400).json({ field: 'nomor_telepon', message: 'Format nomor telepon tidak valid' });
+  }
+  next();
+};
+
 const validateIDPengguna = (req, res, next) => {
   const idPengguna = req.params.idPengguna;
   if (!idPengguna || isNaN(idPengguna) || parseInt(idPengguna) <= 0) {
@@ -53,4 +71,4 @@ const validateIDPengguna = (req, res, next) => {
   next();
 };
 
-module.exports = { checkCreatePengguna, validateIDPengguna };
+module.exports = { checkCreatePengguna, checkUpdatePengguna, validateIDPengguna };

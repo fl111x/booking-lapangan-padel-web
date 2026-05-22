@@ -98,9 +98,24 @@ const deleteUlasan = async (req, res) => {
     }
 };
 
+const getUlasanSpesifikGor = async (req, res) => {
+    const { idGor } = req.params;
+    try {
+        const [data] = await ulasanModel.getUlasanByGorId(idGor);
+        res.json({
+            success: true,
+            message: `Berhasil mengambil ulasan untuk GOR ID ${idGor}`,
+            data: data
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal mengambil ulasan spesifik', error: error.message });
+    }
+};
+
 module.exports = {
     getAllUlasans,
     createNewUlasan,
     updateUlasan,
-    deleteUlasan
+    deleteUlasan,
+    getUlasanSpesifikGor
 };
