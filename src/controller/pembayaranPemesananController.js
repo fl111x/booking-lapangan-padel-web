@@ -1,4 +1,4 @@
-const pembayaranModel = require('../model/pembayaranPemesanan');
+const pembayaranPemesananModel = require('../model/pembayaranPemesanan');
 const pemesananModel = require('../model/pemesanan');
 const notifikasiModel = require('../model/notifikasi');
 const snap = require('../config/midtrans');
@@ -93,7 +93,7 @@ const handleMidtransWebhook = async (req, res) => {
 
         const { id_pemesanan, jumlah_bayar } = pembayaranLocal[0];
 
-        const { statusPembayaran, statusSistem } = petakanStatusMidtrans(transaction_status, fraud_status);
+        const { statusPembayaran, statusSistem } = petakanStatusMidtrans(transactionStatus, fraudStatus);
 
         // Terjemahkan status sistem khusus pemesanan lapangan
         const statusPemesanan = statusSistem === 'aktif_atau_dibayar' ? 'dibayar' : (statusSistem === 'batal' ? 'dibatalkan' : 'pending');

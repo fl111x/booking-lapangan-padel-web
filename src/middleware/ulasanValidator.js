@@ -2,9 +2,6 @@ const checkCreateUlasan = (req, res, next) => {
   const data = req.body;
 
   // 1. Validasi Foreign Key
-  if (!data.id_pengguna || isNaN(data.id_pengguna)) {
-    return res.status(400).json({ field: 'id_pengguna', message: 'ID Pengguna wajib diisi dan harus berupa angka' });
-  }
   if (!data.id_gor || isNaN(data.id_gor)) {
     return res.status(400).json({ field: 'id_gor', message: 'ID GOR wajib diisi dan harus berupa angka' });
   }

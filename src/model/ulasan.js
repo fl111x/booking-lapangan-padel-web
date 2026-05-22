@@ -11,6 +11,12 @@ const getAllUlasans = () => {
     return dbPool.execute(SQL);
 }
 
+const getUlasanById = async (idUlasan) => {
+    const SQL = 'SELECT * FROM ulasan WHERE id_ulasan = ? LIMIT 1';
+    const [rows] = await dbPool.execute(SQL, [idUlasan]);
+    return rows[0];
+}
+
 const createNewUlasan = (data) => {
     const { id_pengguna, id_gor, rating, komentar } = data;
     
@@ -20,12 +26,12 @@ const createNewUlasan = (data) => {
 }
 
 const updateUlasan = (idUlasan, data) => {
-    const { id_pengguna, id_gor, rating, komentar } = data;
+    const { id_gor, rating, komentar } = data; // Hapus id_pengguna dari destructuring
     
     const SQL = `UPDATE ulasan
-                 SET id_pengguna = ?, id_gor = ?, rating = ?, komentar = ?
+                 SET id_gor = ?, rating = ?, komentar = ?
                  WHERE id_ulasan = ?`;
-    return dbPool.execute(SQL, [id_pengguna, id_gor, rating, komentar || null, idUlasan]);
+    return dbPool.execute(SQL, [id_gor, rating, komentar || null, idUlasan]);
 }
 
 const deleteUlasan = (idUlasan) => {
@@ -35,6 +41,7 @@ const deleteUlasan = (idUlasan) => {
 
 module.exports = {
     getAllUlasans,
+    getUlasanById,
     createNewUlasan,
     updateUlasan,
     deleteUlasan
