@@ -98,7 +98,7 @@ const handleMidtransWebhookMembership = async (req, res) => {
 
         const { id_langganan, jumlah_bayar } = pembayaranLocal[0];
 
-        const { statusPembayaran, statusSistem } = petakanStatusMidtrans(transaction_status, fraud_status);
+        const { statusPembayaran, statusSistem } = petakanStatusMidtrans(transactionStatus, fraudStatus);
 
         // Terjemahkan status khusus akun langganan membership
         const statusLangganan = statusSistem === 'aktif_atau_dibayar' ? 'aktif' : (statusSistem === 'batal' ? 'tidak aktif' : 'pending');

@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 /**
- * Menghasilkan konten notifikasi interaktif ala Duolingo menggunakan Gemini AI
+ * Menghasilkan konten notifikasi interaktif menggunakan Gemini AI
  * @param {string} tipe - Kategori notifikasi ('pengingat_main', 'sukses_bayar', 'membership_aktif')
  * @param {string} namaUser - Nama pelanggan penerima notifikasi
  * @returns {Promise<object>} - Objek berisi properti judul dan pesan
