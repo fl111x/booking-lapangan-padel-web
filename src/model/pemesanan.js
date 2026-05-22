@@ -13,7 +13,16 @@ const createNewPemesanan = (data) => {
     const SQL = `INSERT INTO pemesanan (id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon, total_harga, status_pemesanan) 
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
                  
-    return dbPool.execute(SQL, [id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon || 0, total_harga, status_pemesanan || 'pending']);
+    return dbPool.execute(SQL, [
+        id_pengguna,
+        id_lapangan,
+        tanggal,
+        jam_mulai,
+        durasi,
+        potongan_diskon ?? 0,
+        total_harga ?? 0,
+        status_pemesanan ?? 'pending'
+    ]);
 }
 
 const updatePemesanan = (idPemesanan, data) => {
@@ -23,7 +32,17 @@ const updatePemesanan = (idPemesanan, data) => {
                  SET id_pengguna = ?, id_lapangan = ?, tanggal = ?, jam_mulai = ?, durasi = ?, potongan_diskon = ?, total_harga = ?, status_pemesanan = ?
                  WHERE id_pemesanan = ?`;
                  
-    return dbPool.execute(SQL, [id_pengguna, id_lapangan, tanggal, jam_mulai, durasi, potongan_diskon || 0, total_harga, status_pemesanan || 'pending', idPemesanan]);
+    return dbPool.execute(SQL, [
+        id_pengguna,
+        id_lapangan,
+        tanggal,
+        jam_mulai,
+        durasi,
+        potongan_diskon ?? 0,
+        total_harga ?? 0,
+        status_pemesanan ?? 'pending',
+        idPemesanan
+    ]);
 }
 
 const deletePemesanan = (idPemesanan) => {

@@ -5,7 +5,7 @@ const { checkCreatePemesanan, validateIDPemesanan } = require('../middleware/pem
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
 
 // RUTE PELANGGAN
-router.get('/saya', authenticateToken, pemesananController.getPemesananUser);
+router.get('/user', authenticateToken, pemesananController.getPemesananUser);
 router.post('/', authenticateToken, checkCreatePemesanan, pemesananController.createNewPemesanan);
 
 // RUTE ADMIN (Akses seluruh data & manipulasi)

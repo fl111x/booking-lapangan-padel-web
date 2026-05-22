@@ -20,10 +20,14 @@ const getAllPemesanan = async (req, res) => {
 }
 
 const createNewPemesanan = async (req, res) => {
-    const { id_pengguna, id_lapangan, tanggal, jam_mulai, durasi } = req.body;
+    // 1. Ambil id_pengguna dari Token Login (bukan dari ketikan Postman)
+    const id_pengguna = req.user.id_pengguna; 
+    
+    // 2. Ambil data sisanya dari Postman
+    const { id_lapangan, tanggal, jam_mulai, durasi } = req.body;
     
     try {
-        // Proteksi bentrok jadwal lapangan
+        // Cek apakah jadwal bentrok
         const isBentrok = await cekJadwal(id_lapangan, tanggal, jam_mulai, durasi);
         if (isBentrok) {
             return res.status(400).json({
@@ -33,17 +37,22 @@ const createNewPemesanan = async (req, res) => {
             });
         }
 
-        // Hitung diskon member dan total harga dari server
+        // Kalkulasi diskon (id_pengguna kini sudah pasti ada isinya dari token)
         const kalkulasiHarga = await hitungDiskon(id_pengguna, id_lapangan, durasi);
 
-        // Satukan data request dari client dengan data hasil perhitungan server
+        // Satukan semua data sebelum dikirim ke MySQL
         const pemesananData = {
-            ...req.body,
+            id_pengguna: id_pengguna, // Memasukkan ID dari token ke data yang akan disimpan
+            id_lapangan,
+            tanggal,
+            jam_mulai,
+            durasi,
             potongan_diskon: kalkulasiHarga.potongan_diskon,
-            total_harga: kalkulasiHarga.total_harga
+            total_harga: kalkulasiHarga.total_harga,
+            status_pemesanan: 'pending'
         };
 
-        // Kirim data yang sudah bersih ke query MySQL
+        // Kirim ke database
         await pemesananModel.createNewPemesanan(pemesananData);
         
         res.status(201).json({

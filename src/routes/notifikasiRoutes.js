@@ -4,7 +4,7 @@ const notifikasiController = require('../controller/notifikasiController');
 const { checkCreateNotifikasi, validateIDNotifikasi } = require('../middleware/notifikasiValidator');
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
 
-router.get('/saya', authenticateToken, notifikasiController.getNotifikasiUser);
+router.get('/user', authenticateToken, notifikasiController.getNotifikasiUser);
 router.get('/', authenticateToken, requireRole('admin'), notifikasiController.getAllNotifikasi);
 router.post('/', authenticateToken, requireRole('admin'), notifikasiController.createNewNotifikasi);
 router.put('/:idNotifikasi', authenticateToken, validateIDNotifikasi, notifikasiController.updateNotifikasi);

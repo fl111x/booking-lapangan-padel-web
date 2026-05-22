@@ -49,8 +49,7 @@ const requestSnapToken = async (req, res) => {
         const transaction = await snap.createTransaction(transactionDetails);
         const snapToken = transaction.token;
 
-        // Catat invoice awal ke database dengan status 'pending'
-        await pembayaranModel.createNewPembayaran({
+        await pembayaranPemesananModel.createNewPembayaranPemesanan({
             id_pemesanan,
             order_id: orderId,
             snap_token: snapToken,
@@ -86,7 +85,7 @@ const handleMidtransWebhook = async (req, res) => {
         const transactionId = statusResponse.transaction_id;
 
         // Ambil data lokal pembayaran untuk mengetahui id_pemesanan terkait
-        const [pembayaranLocal] = await pembayaranModel.getPembayaranByOrderId(orderId);
+        const [pembayaranLocal] = await pembayaranPemesananModel.getPembayaranByOrderId(orderId);
         if (pembayaranLocal.length === 0) {
             return res.status(404).json({ success: false, message: 'Order ID tidak dikenali oleh sistem GOR' });
         }
@@ -99,7 +98,7 @@ const handleMidtransWebhook = async (req, res) => {
         const statusPemesanan = statusSistem === 'aktif_atau_dibayar' ? 'dibayar' : (statusSistem === 'batal' ? 'dibatalkan' : 'pending');
 
         // 1. Update status di tabel pembayaran_pemesanan
-        await pembayaranModel.updateStatusPembayaranByOrderId(orderId, {
+        await pembayaranPemesananModel.updateStatusPembayaranByOrderId(orderId, {
             transaction_id: transactionId,
             payment_type: paymentType,
             status_pembayaran_pemesanan: statusPembayaran,
