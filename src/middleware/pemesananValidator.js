@@ -1,13 +1,9 @@
 const checkCreatePemesanan = (req, res, next) => {
   const data = req.body;
-
   const dateRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:([0-5]\d))?$/;
 
   // 1. Validasi Foreign Keys
-  if (!data.id_pengguna || isNaN(data.id_pengguna)) {
-    return res.status(400).json({ field: 'id_pengguna', message: 'ID Pengguna wajib diisi dan harus berupa angka' });
-  }
   if (!data.id_lapangan || isNaN(data.id_lapangan)) {
     return res.status(400).json({ field: 'id_lapangan', message: 'ID Lapangan wajib diisi dan harus berupa angka' });
   }
@@ -31,17 +27,7 @@ const checkCreatePemesanan = (req, res, next) => {
     return res.status(400).json({ field: 'durasi', message: 'Durasi sewa harus berupa angka positif' });
   }
 
-  // 5. Validasi Potongan Diskon
-  if (data.potongan_diskon !== undefined && (isNaN(data.potongan_diskon) || parseInt(data.potongan_diskon) < 0)) {
-    return res.status(400).json({ field: 'potongan_diskon', message: 'Potongan diskon harus berupa nominal angka positif atau 0' });
-  }
-
-  // 6. Validasi Total Harga
-  if (data.total_harga === undefined || isNaN(data.total_harga) || parseInt(data.total_harga) < 0) {
-    return res.status(400).json({ field: 'total_harga', message: 'Total harga harus berupa nominal angka positif' });
-  }
-
-  // 7. Validasi status_pemesanan
+  // 5. Validasi status_pemesanan
   const validStatus = ['pending', 'dibayar', 'dibatalkan', 'expired', 'selesai'];
   if (data.status_pemesanan && !validStatus.includes(data.status_pemesanan)) {
     return res.status(400).json({ field: 'status_pemesanan', message: 'Status harus berisi salah satu dari: pending, dibayar, dibatalkan, expired, selesai' });

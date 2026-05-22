@@ -22,11 +22,20 @@ const createNewNotifikasi = (data) => {
 const updateNotifikasi = (idNotifikasi, data) => {
     const { judul, pesan, is_read } = data;
     
+    // Menggunakan COALESCE agar kolom yang tidak dikirim dari Postman tidak tertimpa/hilang
     const SQL = `UPDATE notifikasi 
-                 SET judul = ?, pesan = ?, is_read = ? 
+                 SET judul = COALESCE(?, judul), 
+                     pesan = COALESCE(?, pesan), 
+                     is_read = COALESCE(?, is_read) 
                  WHERE id_notifikasi = ?`;
                  
-    return dbPool.execute(SQL, [judul, pesan, is_read !== undefined ? is_read : false, idNotifikasi]);
+    // Ubah undefined menjadi null agar bisa dibaca dengan aman oleh COALESCE
+    return dbPool.execute(SQL, [
+        judul ?? null, 
+        pesan ?? null, 
+        is_read ?? null, 
+        idNotifikasi
+    ]);
 }
 
 const deleteNotifikasi = (idNotifikasi) => {

@@ -59,7 +59,7 @@ const createNewNotifikasi = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Notifikasi AI berkarakter Duolingo berhasil diterbitkan!',
+            message: 'Notifikasi AI berhasil diterbitkan!',
             data: { id_pengguna, ...kontenAi }
         });
     } catch (error) {

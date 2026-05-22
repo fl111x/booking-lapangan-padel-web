@@ -5,7 +5,7 @@ const { checkCreateLangganan, validateIDLangganan } = require('../middleware/lan
 const { authenticateToken, requireRole } = require('../middleware/authMiddleware');
 
 // RUTE PELANGGAN
-router.get('/saya', authenticateToken, langgananController.getLanggananUser);
+router.get('/user', authenticateToken, langgananController.getLanggananUser);
 router.post('/', authenticateToken, checkCreateLangganan, langgananController.createNewLangganan);
 
 // RUTE ADMIN (Akses seluruh data & manipulasi)
