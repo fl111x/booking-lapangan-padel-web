@@ -6,6 +6,7 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 
 router
 .get('/', ulasanController.getAllUlasans)
+.get('/gor/:idGor', ulasanController.getUlasanSpesifikGor)
 .post('/', authenticateToken, checkCreateUlasan, ulasanController.createNewUlasan)
 .put('/:idUlasan', authenticateToken, validateIDUlasan, checkCreateUlasan, ulasanController.updateUlasan)
 .delete('/:idUlasan', authenticateToken, validateIDUlasan, ulasanController.deleteUlasan);

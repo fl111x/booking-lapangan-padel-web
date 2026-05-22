@@ -39,10 +39,21 @@ const deleteUlasan = (idUlasan) => {
     return dbPool.execute(SQL, [idUlasan]);
 }
 
+const getUlasanByGorId = (idGor) => {
+    const SQL = `SELECT u.id_ulasan, p.nama AS nama_pengulas, p.foto_profil, 
+                        u.rating, u.komentar, u.created_at
+                 FROM ulasan u
+                 JOIN pengguna p ON u.id_pengguna = p.id_pengguna
+                 WHERE u.id_gor = ?
+                 ORDER BY u.created_at DESC`;
+    return dbPool.execute(SQL, [idGor]);
+}
+
 module.exports = {
     getAllUlasans,
     getUlasanById,
     createNewUlasan,
     updateUlasan,
-    deleteUlasan
+    deleteUlasan,
+    getUlasanByGorId
 };
