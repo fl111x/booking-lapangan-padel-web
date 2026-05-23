@@ -1,9 +1,14 @@
 const dbPool = require('../config/db');
 
 const getAllPemesanan = () => {
-    const SQL = `SELECT id_pemesanan, id_pengguna, id_lapangan, tanggal, jam_mulai, 
-                        durasi, potongan_diskon, total_harga, status_pemesanan, created_at, updated_at 
-                 FROM pemesanan`;
+    // Kita gunakan JOIN agar nama pengguna dan nama lapangan ikut terbawa ke frontend
+    const SQL = `SELECT p.id_pemesanan, p.id_pengguna, u.nama AS nama_pengguna, 
+                        p.id_lapangan, l.nama_lapangan, p.tanggal, p.jam_mulai, 
+                        p.durasi, p.potongan_diskon, p.total_harga, p.status_pemesanan, p.created_at
+                 FROM pemesanan p
+                 JOIN pengguna u ON p.id_pengguna = u.id_pengguna
+                 JOIN lapangan l ON p.id_lapangan = l.id_lapangan
+                 ORDER BY p.tanggal DESC, p.jam_mulai DESC`;
     return dbPool.execute(SQL);
 }
 

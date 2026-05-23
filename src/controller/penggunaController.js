@@ -53,16 +53,27 @@ const createNewPengguna = async (req, res) => {
 const updatePengguna = async (req, res) => {
     const { idPengguna } = req.params;
     try {
-        const { password } = req.body;
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        // 1. Ambil data user lama dari database
+        const userLama = await penggunaModel.findPenggunaById(idPengguna);
+        if (!userLama) {
+            return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan' });
+        }
+
+        // 2. Cek apakah admin mengirimkan password baru
+        let finalPassword = userLama.password;
+        if (req.body.password) {
+            const saltRounds = 10;
+            finalPassword = await bcrypt.hash(req.body.password, saltRounds);
+        }
         
+        // 3. Gabungkan data lama dengan data baru
         const userData = {
+            ...userLama,
             ...req.body,
-            password: hashedPassword
+            password: finalPassword
         };
 
-        // Menggunakan userData, bukan req.body plain text
+        // 4. Update ke database
         await penggunaModel.updatePengguna(idPengguna, userData);
         
         res.json({
@@ -71,7 +82,8 @@ const updatePengguna = async (req, res) => {
             data: {
                 id_pengguna: idPengguna,
                 nama: userData.nama,
-                email: userData.email
+                email: userData.email,
+                role: userData.role
             }
         });
     } catch (error) {
