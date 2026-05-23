@@ -70,11 +70,31 @@ const getPemesananByUserId = (idPengguna) => {
     return dbPool.execute(SQL, [idPengguna]);
 };
 
+const getLaporanPendapatanBulanan = () => {
+    const SQL = `
+        SELECT 
+            g.id_gor,
+            g.nama_gor,
+            YEAR(p.tanggal) AS tahun,
+            MONTH(p.tanggal) AS bulan,
+            SUM(p.total_harga) AS total_pendapatan,
+            COUNT(p.id_pemesanan) AS jumlah_pesanan
+        FROM pemesanan p
+        JOIN lapangan l ON p.id_lapangan = l.id_lapangan
+        JOIN gor g ON l.id_gor = g.id_gor
+        WHERE p.status_pemesanan IN ('dibayar', 'selesai')
+        GROUP BY g.id_gor, YEAR(p.tanggal), MONTH(p.tanggal)
+        ORDER BY tahun DESC, bulan DESC, g.nama_gor ASC
+    `;
+    return dbPool.execute(SQL);
+};
+
 module.exports = {
     getAllPemesanan,
     createNewPemesanan,
     updatePemesanan,
     deletePemesanan,
     updateStatusPemesanan,
-    getPemesananByUserId
+    getPemesananByUserId,
+    getLaporanPendapatanBulanan
 };

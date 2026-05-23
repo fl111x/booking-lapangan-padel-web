@@ -1,8 +1,9 @@
+// Pindahkan Regex ke luar (global scope) agar bisa dibaca oleh fungsi create dan update
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[0-9+]{10,15}$/;
+
 const checkCreatePengguna = (req, res, next) => {
   const data = req.body;
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^[0-9+]{10,15}$/;
 
   // 1. Validasi Nama
   if (!data.nama) {
@@ -54,6 +55,7 @@ const checkUpdatePengguna = (req, res, next) => {
   if (data.email && !emailRegex.test(data.email)) {
     return res.status(400).json({ field: 'email', message: 'Format email tidak valid' });
   }
+  // PERBAIKAN: Jika password dikosongkan (undefined), lewati validasi panjang password
   if (data.password && data.password.length < 8) {
     return res.status(400).json({ field: 'password', message: 'Password minimal harus 8 karakter' });
   }
