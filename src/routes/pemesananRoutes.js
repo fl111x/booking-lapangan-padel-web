@@ -9,7 +9,8 @@ router.get('/user', authenticateToken, pemesananController.getPemesananUser);
 router.post('/', authenticateToken, checkCreatePemesanan, pemesananController.createNewPemesanan);
 
 // RUTE ADMIN (Akses seluruh data & manipulasi)
-router.get('/', authenticateToken, requireRole('admin'), pemesananController.getAllPemesanan); 
+router.get('/', authenticateToken, requireRole('admin'), pemesananController.getAllPemesanan);
+router.get('/laporan-bulanan', authenticateToken, requireRole('admin'), pemesananController.getLaporanBulanan);
 router.put('/:idPemesanan', authenticateToken, requireRole('admin'), validateIDPemesanan, checkCreatePemesanan, pemesananController.updatePemesanan);
 router.delete('/:idPemesanan', authenticateToken, requireRole('admin'), validateIDPemesanan, pemesananController.deletePemesanan);
 

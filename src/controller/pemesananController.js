@@ -123,10 +123,29 @@ const getPemesananUser = async (req, res) => {
     }
 };
 
+const getLaporanBulanan = async (req, res) => {
+    try {
+        const [data] = await pemesananModel.getLaporanPendapatanBulanan(); 
+        
+        res.json({
+            success: true,
+            message: 'Berhasil mengambil laporan pendapatan bulanan per GOR',
+            data: data
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Gagal mengambil laporan pendapatan bulanan',
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getAllPemesanan,
     createNewPemesanan,
     updatePemesanan,
     deletePemesanan,
-    getPemesananUser
+    getPemesananUser,
+    getLaporanBulanan
 };

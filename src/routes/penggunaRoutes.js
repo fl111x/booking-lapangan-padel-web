@@ -16,7 +16,7 @@ router.put('/user', authenticateToken, checkUpdatePengguna, penggunaController.u
 router
 .get('/', authenticateToken, requireRole('admin'), penggunaController.getAllPenggunas)
 .post('/', authenticateToken, requireRole('admin'), checkCreatePengguna, penggunaController.createNewPengguna)
-.put('/:idPengguna', authenticateToken, requireRole('admin'), validateIDPengguna, checkCreatePengguna, penggunaController.updatePengguna) 
+.put('/:idPengguna', authenticateToken, requireRole('admin'), validateIDPengguna, checkUpdatePengguna, penggunaController.updatePengguna) 
 .delete('/:idPengguna', authenticateToken, requireRole('admin'), validateIDPengguna, penggunaController.deletePengguna);
 
 module.exports = router;
