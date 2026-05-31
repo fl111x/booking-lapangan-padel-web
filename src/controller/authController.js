@@ -82,7 +82,8 @@ const login = async (req, res) => {
                 id_pengguna: user.id_pengguna,
                 nama: user.nama,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                foto_profil: user.foto_profil
             }
         });
     } catch (error) {

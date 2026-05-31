@@ -42,7 +42,14 @@ const requestSnapToken = async (req, res) => {
                 price: dataSewa.total_harga,
                 quantity: 1,
                 name: `Sewa ${dataSewa.nama_lapangan}`
-            }]
+            }],
+            
+            // 🔥 PERBAIKAN: Kembalikan callbacks, tapi arahkan ke halaman pembayaran!
+            callbacks: {
+                finish: "http://localhost:5173/pembayaran",
+                error: "http://localhost:5173/pembayaran",
+                pending: "http://localhost:5173/pembayaran"
+            }
         };
 
         // Tembak API Midtrans untuk mendapatkan snap_token pop-up

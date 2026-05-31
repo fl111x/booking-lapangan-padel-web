@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 const penggunaModel = require('../model/pengguna');
 
 const getAllPenggunas = async (req, res) => {
@@ -136,7 +138,6 @@ const getProfile = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-    // Mengambil ID secara rahasia dari hasil dekripsi Token JWT
     const idPengguna = req.user.id_pengguna;
     
     try {
@@ -147,14 +148,37 @@ const updateProfile = async (req, res) => {
             const saltRounds = 10;
             finalPassword = await bcrypt.hash(req.body.password, saltRounds);
         }
+
+        // LOGIKA PENANGANAN FILE FOTO PROFIL
+        let fotoProfilPath = userLama.foto_profil; 
+        
+        if (req.file) {
+            // JIKA USER MENGUNGGAH FOTO BARU, HAPUS DULU FOTO LAMANYA DARI SERVER
+            if (userLama.foto_profil) {
+                try {
+                    // Mencari lokasi pasti file lama di folder public/uploads/...
+                    const oldFilePath = path.join(process.cwd(), 'public', userLama.foto_profil);
+                    // Cek apakah filenya masih ada di folder, lalu hapus
+                    if (fs.existsSync(oldFilePath)) {
+                        fs.unlinkSync(oldFilePath);
+                    }
+                } catch (err) {
+                    console.error("Gagal menghapus foto lama:", err);
+                }
+            }
+            
+            // Simpan path foto yang baru
+            fotoProfilPath = `/uploads/profiles/${req.file.filename}`;
+        }
         
         const userData = {
             ...userLama,
             ...req.body,
-            password: finalPassword
+            password: finalPassword,
+            foto_profil: fotoProfilPath
         };
 
-        // Jalankan pembaruan ke database MySQL menggunakan ID dari token
+        // Simpan ke MySQL
         await penggunaModel.updatePengguna(idPengguna, userData);
         
         res.json({
@@ -164,7 +188,8 @@ const updateProfile = async (req, res) => {
                 id_pengguna: idPengguna,
                 nama: userData.nama,
                 email: userData.email,
-                nomor_telepon: userData.nomor_telepon
+                nomor_telepon: userData.nomor_telepon,
+                foto_profil: userData.foto_profil
             }
         });
     } catch (error) {

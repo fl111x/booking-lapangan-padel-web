@@ -7,7 +7,7 @@ const port = process.env.PORT || '3000';
 
 app.use(cors());
 app.use(express.json());
-
+const path = require('path');
 
 // routes
 const gorRoutes = require('./routes/gorRoutes');
@@ -35,6 +35,9 @@ app.use('/pembayaran-membership', pembayaranMembershipRoutes);
 app.use('/pembayaran-pemesanan', pembayaranPemesananRoutes);
 app.use('/notifikasi', notifikasiRoutes);
 app.use('/admin', adminDashboardRoutes);
+app.use('/uploads', express.static('public/uploads'));
+
+require('./utils/cronAI');
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

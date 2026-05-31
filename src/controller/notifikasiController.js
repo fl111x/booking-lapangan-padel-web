@@ -21,10 +21,14 @@ const getAllNotifikasi = async (req, res) => {
 
 const getNotifikasiUser = async (req, res) => {
     try {
-        // req.user.id_pengguna disuplai aman dari middleware authenticateToken
         const idPengguna = req.user.id_pengguna; 
         const [data] = await notifikasiModel.getNotifikasiByUserId(idPengguna);
         
+        // sistem otomatis mengubah status semua pesan menjadi terbaca di database!
+        if (req.query.markRead === 'true') {
+            await notifikasiModel.markAllAsReadByUser(idPengguna);
+        }
+
         res.json({
             success: true,
             message: 'Berhasil mengambil kotak masuk notifikasi pribadi kamu',

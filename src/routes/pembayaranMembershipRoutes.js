@@ -14,6 +14,8 @@ router.delete('/:idPembayaran', authenticateToken, requireRole('admin'), validat
 // 1. Ditembak front-end saat pengguna mengklik tombol "Beli Paket Member"
 router.post('/checkout', authenticateToken, pembayaranController.requestSnapTokenMembership);
 
+router.delete('/batal/:idLangganan', authenticateToken, pembayaranController.batalPembayaranMembershipOlehUser);
+
 // 2. Di-hit otomatis oleh Server Midtrans Sandbox (Jangan gunakan middleware validator!)
 router.post('/webhook', pembayaranController.handleMidtransWebhookMembership);
 

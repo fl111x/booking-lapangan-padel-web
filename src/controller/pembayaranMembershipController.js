@@ -11,13 +11,15 @@ const requestSnapTokenMembership = async (req, res) => {
     const id_pengguna = req.user.id_pengguna;
 
     try {
-        // 1. Ambil data paket membership untuk menghitung harga
+        // 1. Ambil data paket membership untuk mengambil data harga
         const [paket] = await dbPool.execute('SELECT * FROM membership WHERE id_membership = ?', [id_membership]);
         if (paket.length === 0) return res.status(404).json({ success: false, message: 'Paket membership tidak ditemukan' });
         
         const dataPaket = paket[0];
-        // Hitung total bayar setelah diskon
-        const totalBayar = dataPaket.harga - ((dataPaket.diskon / 100) * dataPaket.harga);
+        
+        // PERBAIKAN: Total bayar adalah harga murni paket tersebut.
+        // Kolom 'diskon' hanya digunakan untuk penyewaan lapangan nanti, bukan untuk diskon beli paket!
+        const totalBayar = dataPaket.harga;
 
         // 2. Buat "Pending Subscription"
         const [langganan] = await langgananModel.createNewLangganan({
@@ -42,10 +44,21 @@ const requestSnapTokenMembership = async (req, res) => {
         const transaction = await snap.createTransaction({
             transaction_details: { order_id: orderId, gross_amount: totalBayar },
             customer_details: { first_name: req.user.nama, email: req.user.email },
-            item_details: [{ id: `MBR-${id_membership}`, price: totalBayar, quantity: 1, name: dataPaket.nama_membership }]
+            item_details: [{ id: `MBR-${id_membership}`, price: totalBayar, quantity: 1, name: dataPaket.nama_membership }],
+
+            callbacks: {
+                finish: "http://localhost:5173/riwayat",
+                error: "http://localhost:5173/riwayat",
+                pending: "http://localhost:5173/riwayat"
+            }
         });
 
-        res.status(201).json({ success: true, snap_token: transaction.token, redirect_url: transaction.redirect_url });
+        res.status(201).json({ 
+            success: true, 
+            snap_token: transaction.token, 
+            redirect_url: transaction.redirect_url,
+            id_langganan: id_langganan 
+        });
 
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal checkout paket membership', error: error.message });
@@ -162,11 +175,37 @@ const deletePembayaran = async (req, res) => {
     }
 }
 
+const batalPembayaranMembershipOlehUser = async (req, res) => {
+    const { idLangganan } = req.params;
+    const id_pengguna = req.user.id_pengguna;
+
+    try {
+        // 1. Hapus log pembayaran di tabel anak terlebih dahulu (Mencegah Error Foreign Key)
+        await dbPool.execute('DELETE FROM pembayaran_membership WHERE id_langganan = ?', [idLangganan]);
+
+        // 2. Hapus data langganan utama (Hanya jika statusnya masih pending dan milik user yang login)
+        const [result] = await dbPool.execute(
+            `DELETE FROM langganan_membership WHERE id_langganan = ? AND id_pengguna = ? AND status_langganan = 'pending'`, 
+            [idLangganan, id_pengguna]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(400).json({ success: false, message: 'Pesanan tidak ditemukan atau sudah diproses.' });
+        }
+
+        res.json({ success: true, message: 'Pesanan membership berhasil dibatalkan.' });
+    } catch (error) {
+        console.error("Error Batal Membership:", error);
+        res.status(500).json({ success: false, message: 'Gagal membatalkan pesanan membership', error: error.message });
+    }
+};
+
 module.exports = {
     getAllPembayaran,
     createNewPembayaran,
     updatePembayaran,
     deletePembayaran,
     requestSnapTokenMembership,
-    handleMidtransWebhookMembership
+    handleMidtransWebhookMembership,
+    batalPembayaranMembershipOlehUser
 };

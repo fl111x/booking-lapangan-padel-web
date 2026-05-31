@@ -17,11 +17,18 @@ const createNewGor = (data) => {
 const updateGor = (idGor, data) => {
   const { nama_gor, alamat, jam_buka, jam_tutup, status_gor, foto_gor } = data;
   
-  const SQL = `UPDATE gor 
-               SET nama_gor = ?, alamat = ?, jam_buka = ?, jam_tutup = ?, status_gor = ?, foto_gor = ? 
-               WHERE id_gor = ?`;
-               
-  return dbPool.execute(SQL, [nama_gor, alamat, jam_buka, jam_tutup, status_gor || 'buka', foto_gor || null, idGor]);
+  if (foto_gor !== undefined) {
+      const SQL = `UPDATE gor 
+                   SET nama_gor = ?, alamat = ?, jam_buka = ?, jam_tutup = ?, status_gor = ?, foto_gor = ? 
+                   WHERE id_gor = ?`;
+      return dbPool.execute(SQL, [nama_gor, alamat, jam_buka, jam_tutup, status_gor || 'buka', foto_gor, idGor]);
+  }
+  else {
+      const SQL = `UPDATE gor 
+                   SET nama_gor = ?, alamat = ?, jam_buka = ?, jam_tutup = ?, status_gor = ? 
+                   WHERE id_gor = ?`;
+      return dbPool.execute(SQL, [nama_gor, alamat, jam_buka, jam_tutup, status_gor || 'buka', idGor]);
+  }
 };
 
 const deleteGor = (idGor) => {

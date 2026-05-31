@@ -7,6 +7,7 @@ const { authenticateToken, requireRole } = require('../middleware/authMiddleware
 // RUTE PELANGGAN
 router.get('/user', authenticateToken, pemesananController.getPemesananUser);
 router.post('/', authenticateToken, checkCreatePemesanan, pemesananController.createNewPemesanan);
+router.delete('/batal/:idPemesanan', authenticateToken, pemesananController.batalPemesananOlehUser);
 
 // RUTE ADMIN (Akses seluruh data & manipulasi)
 router.get('/', authenticateToken, requireRole('admin'), pemesananController.getAllPemesanan);
